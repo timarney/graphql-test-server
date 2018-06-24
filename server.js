@@ -1,3 +1,5 @@
+/* https://medium.com/codingthesmartway-com-blog/creating-a-graphql-server-with-node-js-and-express-f6dddc5320e1 */
+
 var express = require("express");
 var express_graphql = require("express-graphql");
 var { buildSchema } = require("graphql");
@@ -6,6 +8,9 @@ var schema = buildSchema(`
     type Query {
         course(id: Int!): Course
         courses(topic: String): [Course]
+    },
+    type Mutation {
+      updateCourseTopic(id: Int!, topic: String!): Course
     },
     type Course {
         id: Int
@@ -60,9 +65,21 @@ var getCourses = function(args) {
     return coursesData;
   }
 };
+
+var updateCourseTopic = function({ id, topic }) {
+  coursesData.map(course => {
+    if (course.id === id) {
+      course.topic = topic;
+      return course;
+    }
+  });
+  return coursesData.filter(course => course.id === id)[0];
+};
+
 var root = {
   course: getCourse,
-  courses: getCourses
+  courses: getCourses,
+  updateCourseTopic: updateCourseTopic
 };
 // Create an express server and a GraphQL endpoint
 var app = express();
